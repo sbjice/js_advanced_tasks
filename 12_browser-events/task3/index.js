@@ -1,8 +1,11 @@
 document.addEventListener(
   'DOMContentLoaded',
   () => {
-
     document.querySelector('.js-block').style.display = 'none';
+    document.querySelector('.js-block').style.position = 'fixed';
+    document.querySelector('.js-block').style.top = '0';
+    document.querySelector('.js-block').style.left = '0';
+    document.querySelector('.js-block').style.right = '0';
 
     window.addEventListener(
       'scroll',
@@ -22,7 +25,4 @@ document.addEventListener(
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     )
-
-
-
   });

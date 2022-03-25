@@ -63,6 +63,9 @@ document.addEventListener(
           document.querySelector('.js-input-lastname').value !== ''
         ){
           event.preventDefault();
+          document.querySelector('.js-input-name').value = '';
+          document.querySelector('.js-input-surname').value = '';
+          document.querySelector('.js-input-lastname').value = '';
           const li = document.createElement('li');
           li.textContent = `${document.querySelector('.js-input-name').value} ${document.querySelector('.js-input-surname').value} ${document.querySelector('.js-input-lastname').value}`;
           li.classList.add('list-group-item', 'bg-success', 'w-100');
