@@ -49,7 +49,7 @@ const configTasksStorage = (taskAddButton, taskInput, tasksStorage) => {
       });
       taskAddButton.disabled = true;
       taskInput.value = '';
-      console.log(tasksStorage.storage);
+      // console.log(tasksStorage.storage);
     }
   )
 }
@@ -78,7 +78,7 @@ const createTODOElement = (todoItem, tasksStorage) => {
       todoItem.done = !todoItem.done;
       tasksStorage.updateTask(todoItem);
       let index = tasksStorage.getIndexOfTask(todoItem);
-      tasksStorage.itemList.children[index].classList.toggle('bg-success', todoItem.done);
+      if (index > -1) tasksStorage.itemList.children[index].classList.toggle('bg-success', todoItem.done);
     }
   );
 
@@ -117,7 +117,7 @@ const createTODOElement = (todoItem, tasksStorage) => {
   }
 }
 
-const createTaskListComponent = () => {
+const createTaskListComponent = (pageTitle, storageManager) => {
   const itemList = document.createElement('ul');
   itemList.style.listStyleType = 'none';
   itemList.classList.add('d-flex', 'flex-column', 'p-0');
@@ -129,11 +129,13 @@ const createTaskListComponent = () => {
       this.storage.push(task);
       this.clearItemList();
       this.fillItemList();
+      this.saveDataToStorage();
     },
     deleteTask(task) {
       this.storage = this.storage.filter(item => item.id !== task.id);
       this.clearItemList();
       this.fillItemList();
+      this.saveDataToStorage();
     },
     updateTask(task) {
       for (let i = 0; i < this.storage.length; i++) {
@@ -141,6 +143,7 @@ const createTaskListComponent = () => {
       }
       this.clearItemList();
       this.fillItemList();
+      this.saveDataToStorage();
     },
     clearItemList() {
       this.itemList.innerHTML = '';
@@ -156,20 +159,93 @@ const createTaskListComponent = () => {
         if (task.id === this.storage[i].id) return i;
       }
       return -1;
+    },
+    saveDataToStorage() {
+      storageManager.saveData(pageTitle, this.storage);
+    },
+    getDataFromStorage() {
+      if (window.localStorage.getItem(pageTitle)) {
+        this.storage = storageManager.getData(pageTitle);
+        this.clearItemList();
+        this.fillItemList();
+      }
     }
+  }
+}
+
+const createStorageManager = () => {
+  const content = document.createElement('div');
+  content.classList.add('d-flex', 'justify-content-between', 'mb-3');
+  const switchingButton = document.createElement('button');
+  switchingButton.classList.add('btn', 'btn-primary');
+  content.append(switchingButton);
+
+  let currentStorage = 'localStorage';
+
+  if (window.localStorage.getItem('storageAddress')) currentStorage = JSON.parse(window.localStorage.getItem('storageAddress'));
+  else window.localStorage.setItem('storageAddress', JSON.stringify(currentStorage));
+
+  switchingButton.textContent = currentStorage;
+
+  const switchStorageManager = () => {
+    if (currentStorage === 'localStorage') currentStorage = 'none';
+    else currentStorage = 'localStorage';
+  }
+
+  switchingButton.addEventListener(
+    'click',
+    () => {
+      switchStorageManager();
+      switchingButton.textContent = currentStorage;
+      window.localStorage.setItem('storageAddress', JSON.stringify(currentStorage));
+    }
+  )
+
+  function saveData(pageTitle, storage) {
+    if (currentStorage === 'localStorage') {
+      window.localStorage.setItem(pageTitle, JSON.stringify(storage));
+    } else {
+      console.log('localStorage inactive');
+    }
+  }
+
+  function getData(pageTitle) {
+    let storage = [];
+    if (currentStorage === 'localStorage') {
+      storage = JSON.parse(window.localStorage.getItem(pageTitle));
+    } else {
+      console.log('localStorage inactive');
+    }
+    return storage;
+  }
+
+  return {
+    content,
+    switchingButton,
+    saveData,
+    getData
   }
 }
 
 const createApp = (container = document.querySelector('.app'), headerText = 'Мои дела') => {
   const appContainer = createContainer();
   const appHeader = createAppHeader(headerText);
-  const taskListComponent = createTaskListComponent();
+  const storageManager = createStorageManager();
+  const taskListComponent = createTaskListComponent(headerText, storageManager);
+  taskListComponent.getDataFromStorage();
+  storageManager.switchingButton.addEventListener(
+    'click',
+    () => {
+      taskListComponent.getDataFromStorage();
+    }
+  )
+
 
   const inputGroup = createInputGroup();
   configTaskInput(inputGroup.input, inputGroup.button);
   configTasksStorage(inputGroup.button, inputGroup.input, taskListComponent);
 
-  appContainer.append(appHeader, inputGroup.inputDiv, taskListComponent.itemList);
+  appContainer.append(appHeader, inputGroup.inputDiv, storageManager.content, taskListComponent.itemList);
   container.classList.add('my-5');
   container.append(appContainer);
 };
