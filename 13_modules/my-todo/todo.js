@@ -1,7 +1,4 @@
-import {
-  createStorageManager,
-  configTasksStorage
-} from "./storage.js";
+import { createStorageManager, configTasksStorage} from "./storage.js";
 
 const createAppHeader = headerText => {
   const headerElement = document.createElement('h2');
@@ -14,33 +11,6 @@ const createContainer = () => {
   container.classList.add('container');
   return container;
 };
-
-const createNav = (navItems = [{
-    href: 'index.html',
-    text: 'Я',
-  },
-  {
-    href: 'mom.html',
-    text: 'Мама',
-  },
-  {
-    href: 'dad.html',
-    text: 'Папа',
-  }
-]) => {
-  if (navItems !== undefined) {
-    const nav = document.createElement('nav');
-    nav.classList.add('d-flex', 'flex-row');
-    for (let item of navItems) {
-      const navItem = document.createElement('a');
-      navItem.href = item.href;
-      navItem.textContent = item.text;
-      navItem.classList.add('nav-link');
-      nav.append(navItem);
-    }
-    return nav;
-  } else return undefined;
-}
 
 const createInputGroup = () => {
   const inputDiv = document.createElement('div');
@@ -72,12 +42,12 @@ const configTaskInput = (taskInput, taskAddButton) => {
 
 const createTODOElement = (todoItem, tasksStorage) => {
   const itemLi = document.createElement('li');
-  itemLi.classList.add('d-flex', 'p-4', 'flex-row', 'rounded', 'border');
+  itemLi.classList.add('d-flex', 'p-4', 'flex-row', 'rounded');
   itemLi.classList.toggle('bg-success', todoItem.done);
 
-  const itemInput = document.createElement('div');
-  itemInput.classList.add('w-50', 'p-1');
-  itemInput.textContent = todoItem.name;
+  const itemInput = document.createElement('input');
+  itemInput.classList.add('form-control', 'w-50');
+  itemInput.value = todoItem.task;
   itemInput.addEventListener(
     'input',
     () => {
@@ -87,7 +57,7 @@ const createTODOElement = (todoItem, tasksStorage) => {
 
   const itemDone = document.createElement('button');
   itemDone.textContent = 'Готово';
-  itemDone.classList.add('btn', 'btn-success', 'border', 'rounded');
+  itemDone.classList.add('btn', 'btn-success', 'border');
   itemDone.addEventListener(
     'click',
     () => {
@@ -98,10 +68,19 @@ const createTODOElement = (todoItem, tasksStorage) => {
     }
   );
 
+  const itemSave = document.createElement('button');
+  itemSave.textContent = 'Сохранить';
+  itemSave.classList.add('btn', 'btn-primary', 'border');
+  itemSave.addEventListener(
+    'click',
+    () => {
+      tasksStorage.updateTask(todoItem);
+    }
+  );
 
   const itemDelete = document.createElement('button');
   itemDelete.textContent = 'Удалить';
-  itemDelete.classList.add('btn', 'btn-danger', 'border', 'rounded');
+  itemDelete.classList.add('btn', 'btn-danger', 'border');
   itemDelete.addEventListener(
     'click',
     () => {
@@ -113,12 +92,13 @@ const createTODOElement = (todoItem, tasksStorage) => {
   const btnGroup = document.createElement('div');
   btnGroup.classList.add('btn-group', 'w-50');
 
-  btnGroup.append(itemDone, itemDelete)
+  btnGroup.append(itemDone, itemSave, itemDelete)
   itemLi.append(itemInput, btnGroup);
   return {
     itemLi,
     itemInput,
     itemDone,
+    itemSave,
     itemDelete
   }
 }
@@ -131,18 +111,25 @@ const createTaskListComponent = (pageTitle, storageManager) => {
   return {
     storage: [],
     itemList: itemList,
-    async addNewTask(task) {
-      await storageManager.addData(pageTitle, this.storage, task);
+    addNewTask(task) {
+      storageManager.addData(pageTitle, this.storage, task);
       this.getDataFromStorage();
-    },
-    async deleteTask(task) {
-      await storageManager.deleteData(pageTitle, this.storage, task);
-      this.getDataFromStorage();
-    },
-    async updateTask(task) {
-      await storageManager.updateData(pageTitle, this.storage, task);
       this.clearItemList();
       this.fillItemList();
+    },
+    deleteTask(task) {
+      storageManager.deleteData(pageTitle, this.storage, task);
+      this.getDataFromStorage();
+      this.clearItemList();
+      this.fillItemList();
+    },
+    updateTask(task) {
+      for (let i = 0; i < this.storage.length; i++) {
+        if (this.storage[i].id === task.id) this.storage[i] = JSON.parse(JSON.stringify(task));
+      }
+      this.clearItemList();
+      this.fillItemList();
+      this.saveDataToStorage();
     },
     clearItemList() {
       this.itemList.innerHTML = '';
@@ -159,17 +146,12 @@ const createTaskListComponent = (pageTitle, storageManager) => {
       }
       return -1;
     },
-    async saveDataToStorage() {
-      await storageManager.saveData(pageTitle, this.storage);
+    saveDataToStorage() {
+      storageManager.saveData(pageTitle, this.storage);
     },
-    async getDataFromStorage() {
+    getDataFromStorage() {
       if (window.localStorage.getItem(pageTitle)) {
-        this.storage = await storageManager.getData(pageTitle);
-        this.clearItemList();
-        this.fillItemList();
-      } else {
-        window.localStorage.setItem(pageTitle, JSON.stringify(this.storage));
-        this.storage = await storageManager.getData(pageTitle);
+        this.storage = storageManager.getData(pageTitle);
         this.clearItemList();
         this.fillItemList();
       }
@@ -177,28 +159,24 @@ const createTaskListComponent = (pageTitle, storageManager) => {
   }
 }
 
-const createApp = async (container = document.querySelector('.app'), headerText = 'Я') => {
+
+const createApp = (container = document.querySelector('.app'), headerText = 'Мои дела') => {
   const appContainer = createContainer();
   const appHeader = createAppHeader(headerText);
-  const storageManager = await createStorageManager();
-  const nav = createNav();
-
+  const storageManager = createStorageManager();
   const taskListComponent = createTaskListComponent(headerText, storageManager);
   taskListComponent.getDataFromStorage();
   storageManager.switchingButton.addEventListener(
     'click',
-    async () => {
-      await taskListComponent.getDataFromStorage();
+    () => {
+      taskListComponent.getDataFromStorage();
     }
   )
 
+
   const inputGroup = createInputGroup();
   configTaskInput(inputGroup.input, inputGroup.button);
-  configTasksStorage(inputGroup.button, inputGroup.input, taskListComponent, headerText);
-
-  if (nav !== undefined) {
-    appContainer.append(nav);
-  }
+  configTasksStorage(inputGroup.button, inputGroup.input, taskListComponent);
 
   appContainer.append(appHeader, inputGroup.inputDiv, storageManager.content, taskListComponent.itemList);
   container.classList.add('my-5');
