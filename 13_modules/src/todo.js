@@ -1,7 +1,7 @@
 import {
   createStorageManager,
   configTasksStorage
-} from "./storage.js";
+} from './storage.js';
 
 const createAppHeader = headerText => {
   const headerElement = document.createElement('h2');
@@ -163,16 +163,12 @@ const createTaskListComponent = (pageTitle, storageManager) => {
       await storageManager.saveData(pageTitle, this.storage);
     },
     async getDataFromStorage() {
-      if (window.localStorage.getItem(pageTitle)) {
-        this.storage = await storageManager.getData(pageTitle);
-        this.clearItemList();
-        this.fillItemList();
-      } else {
+      if (!window.localStorage.getItem(pageTitle)) {
         window.localStorage.setItem(pageTitle, JSON.stringify(this.storage));
-        this.storage = await storageManager.getData(pageTitle);
-        this.clearItemList();
-        this.fillItemList();
       }
+      this.storage = await storageManager.getData(pageTitle);
+      this.clearItemList();
+      this.fillItemList();
     }
   }
 }

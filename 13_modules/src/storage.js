@@ -1,4 +1,4 @@
-const createStorageManager = async () => {
+async function createStorageManager() {
   const content = document.createElement('div');
   content.classList.add('d-flex', 'justify-content-between', 'mb-3');
   const switchingButton = document.createElement('button');
@@ -10,18 +10,27 @@ const createStorageManager = async () => {
   if (window.localStorage.getItem('storageAddress')) currentStorage = JSON.parse(window.localStorage.getItem('storageAddress'));
   else window.localStorage.setItem('storageAddress', JSON.stringify(currentStorage));
 
+  console.log('current storage now:', currentStorage);
+
   let server = null;
-  if (currentStorage === 'server') {
+  async function getServer() {
     server = await import('./api.js');
+  }
+  if (server === null && currentStorage === 'server') {
+    await getServer();
   }
 
   switchingButton.textContent = currentStorage;
 
-
   async function switchStorageManager() {
     if (currentStorage === 'localStorage') {
-      if (server === null) server = await import('./api.js');
       currentStorage = 'server';
+      console.log(currentStorage);
+      if (server === null && currentStorage === 'server') {
+        await getServer();
+        console.log(server);
+        console.log('api module loaded');
+      }
     } else currentStorage = 'localStorage';
   }
 
@@ -31,14 +40,14 @@ const createStorageManager = async () => {
       await switchStorageManager();
       switchingButton.textContent = currentStorage;
       window.localStorage.setItem('storageAddress', JSON.stringify(currentStorage));
+    }, {
+      capture: true
     }
   )
 
   async function saveData(pageTitle, storage) {
     if (currentStorage === 'localStorage') {
       window.localStorage.setItem(pageTitle, JSON.stringify(storage));
-    } else {
-      console.log('localStorage inactive');
     }
   }
 
@@ -48,7 +57,6 @@ const createStorageManager = async () => {
       window.localStorage.setItem(pageTitle, JSON.stringify(storage));
     } else {
       await server.createTodoItem(data);
-      console.log('localStorage inactive');
     }
   }
 
@@ -58,7 +66,6 @@ const createStorageManager = async () => {
       window.localStorage.setItem(pageTitle, JSON.stringify(storage));
     } else {
       await server.deleteTodoItem(data.id);
-      console.log('localStorage inactive');
     }
   }
 
@@ -67,11 +74,11 @@ const createStorageManager = async () => {
     if (currentStorage === 'localStorage') {
       storage = JSON.parse(window.localStorage.getItem(pageTitle));
     } else {
+      if (server===null) await getServer();
       storage = await server.loadTodoItems();
       storage = storage.filter(item => {
         return item.owner === pageTitle
       });
-      console.log('localStorage inactive');
     }
     return storage;
   }
@@ -101,7 +108,7 @@ const createStorageManager = async () => {
   }
 }
 
-const configTasksStorage = (taskAddButton, taskInput, tasksStorage, pageTitle) => {
+function configTasksStorage(taskAddButton, taskInput, tasksStorage, pageTitle){
   taskAddButton.addEventListener(
     'click',
     () => {
