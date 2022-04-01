@@ -206,7 +206,7 @@ const createApp = async (container = document.querySelector('.app'), headerText 
       });
       inputGroup.button.disabled = true;
       inputGroup.input.value = '';
-      await taskListComponent.getDataFromStorage();;
+      // await taskListComponent.getDataFromStorage();;
     }
   )
 

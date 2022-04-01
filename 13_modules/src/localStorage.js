@@ -1,27 +1,34 @@
 function addData(pageTitle, data) {
   let storage = JSON.parse(window.localStorage.getItem(pageTitle));
-  storage = [...storage, data];
+  if (storage) {
+    storage = [...storage, data];
+  } else {
+    storage = [data];
+  }
   window.localStorage.setItem(pageTitle, JSON.stringify(storage));
 }
 
 function deleteData(pageTitle, data) {
   let storage = JSON.parse(window.localStorage.getItem(pageTitle));
-  storage = storage.filter(item => item.name !== data.name);
+  if (storage) storage = storage.filter(item => item.name !== data.name);
   window.localStorage.setItem(pageTitle, JSON.stringify(storage));
 }
 
 function updateData(pageTitle, data) {
   let storage = JSON.parse(window.localStorage.getItem(pageTitle));
-  for (let i = 0; i < storage.length; i++) {
-    if (storage[i].name === data.name) {
-      storage[i] = JSON.parse(JSON.stringify(data));
+  if (storage) {
+    for (let i = 0; i < storage.length; i++) {
+      if (storage[i].name === data.name) {
+        storage[i] = JSON.parse(JSON.stringify(data));
+      }
     }
-  }
+  } else storage = [];
   window.localStorage.setItem(pageTitle, JSON.stringify(storage));
 }
 
 function getData(pageTitle) {
-  return JSON.parse(window.localStorage.getItem(pageTitle));
+  let storage = JSON.parse(window.localStorage.getItem(pageTitle))
+  return storage ? storage : [];
 }
 
 function saveData(pageTitle, storage) {

@@ -1,19 +1,20 @@
 function createStorageManager() {
   return {
-    storage:null,
+    storage: [],
     currentStorage: '',
     server: null,
+    browserStorage: null,
     pageTitle: '',
     async getStorageManager() {
       if (this.currentStorage === 'server') {
-        this.server = await import('./api.js');
+        if (this.server === null) this.server = await import('./api.js');
       } else {
-        this.server = await import('./localStorage.js');
+        if (this.browserStorage === null) this.browserStorage = await import('./localStorage.js');
       }
     },
     async saveData() {
       if (this.currentStorage === 'localStorage') {
-        this.server.saveData(this.pageTitle, this.storage);
+        this.browserStorage.saveData(this.pageTitle, this.storage);
       } else {
         console.log('no such method for API');
       }
@@ -27,7 +28,7 @@ function createStorageManager() {
     },
     async getData() {
       if (this.currentStorage === 'localStorage') {
-        this.storage = this.server.getData(this.pageTitle);
+        this.storage = this.browserStorage.getData(this.pageTitle);
       } else {
         this.storage = await this.server.loadTodoItems();
         this.storage = this.storage.filter(item => {
@@ -39,7 +40,7 @@ function createStorageManager() {
     async addData(data) {
       this.storage = [...this.storage, data];
       if (this.currentStorage === 'localStorage') {
-        this.server.addData(this.pageTitle, data);
+        this.browserStorage.addData(this.pageTitle, data);
       } else {
         await this.server.createTodoItem(data);
       }
@@ -47,7 +48,7 @@ function createStorageManager() {
     async deleteData(data) {
       this.storage = this.storage.filter(item => item.name !== data.name);
       if (this.currentStorage === 'localStorage') {
-        this.server.deleteData(this.pageTitle, data);
+        this.browserStorage.deleteData(this.pageTitle, data);
       } else {
         await this.server.deleteTodoItem(data.id);
       }
@@ -59,7 +60,7 @@ function createStorageManager() {
         }
       }
       if (this.currentStorage === 'localStorage') {
-        this.server.updateData(this.pageTitle, data);
+        this.browserStorage.updateData(this.pageTitle, data);
       } else {
         await this.server.changeTodoItem(data);
       }
