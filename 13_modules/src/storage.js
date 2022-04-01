@@ -81,7 +81,11 @@ function createStorageManager() {
     },
     getIndexOfData(data) {
       for (let i = 0; i < this.storage.length; i++) {
-        if (data.id === this.storage[i].id) return i;
+        if(data.id) {
+          if (data.id === this.storage[i].id) return i;
+        } else {
+          if (data.name === this.storage[i].name) return i;
+        }
       }
       return -1;
     },
