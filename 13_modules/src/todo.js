@@ -1,6 +1,5 @@
 import {
-  createStorageManager,
-  configTasksStorage
+  createStorageManager
 } from './storage.js';
 
 const createAppHeader = headerText => {
@@ -70,7 +69,7 @@ const configTaskInput = (taskInput, taskAddButton) => {
   )
 }
 
-const createTODOElement = (todoItem, tasksStorage) => {
+const createTODOElement = (parent, todoItem, tasksStorage) => {
   const itemLi = document.createElement('li');
   itemLi.classList.add('d-flex', 'p-4', 'flex-row', 'rounded', 'border');
   itemLi.classList.toggle('bg-success', todoItem.done);
@@ -92,9 +91,9 @@ const createTODOElement = (todoItem, tasksStorage) => {
     'click',
     () => {
       todoItem.done = !todoItem.done;
-      tasksStorage.updateTask(todoItem);
-      let index = tasksStorage.getIndexOfTask(todoItem);
-      if (index > -1) tasksStorage.itemList.children[index].classList.toggle('bg-success', todoItem.done);
+      tasksStorage.updateData(todoItem);
+      let index = tasksStorage.getIndexOfData(todoItem);
+      if (index > -1) parent.itemList.children[index].classList.toggle('bg-success', todoItem.done);
     }
   );
 
@@ -105,7 +104,7 @@ const createTODOElement = (todoItem, tasksStorage) => {
   itemDelete.addEventListener(
     'click',
     () => {
-      tasksStorage.deleteTask(todoItem);
+      tasksStorage.deleteData(todoItem);
       itemLi.remove();
     }
   )
@@ -129,18 +128,18 @@ const createTaskListComponent = (pageTitle, storageManager) => {
   itemList.classList.add('d-flex', 'flex-column', 'p-0');
 
   return {
-    storage: [],
     itemList: itemList,
+    storageManager: storageManager,
     async addNewTask(task) {
-      await storageManager.addData(pageTitle, this.storage, task);
+      await this.storageManager.addData(task);
       this.getDataFromStorage();
     },
     async deleteTask(task) {
-      await storageManager.deleteData(pageTitle, this.storage, task);
+      await this.storageManager.deleteData(pageTitle, task);
       this.getDataFromStorage();
     },
     async updateTask(task) {
-      await storageManager.updateData(pageTitle, this.storage, task);
+      await this.storageManager.updateData(pageTitle, task);
       this.clearItemList();
       this.fillItemList();
     },
@@ -148,55 +147,85 @@ const createTaskListComponent = (pageTitle, storageManager) => {
       this.itemList.innerHTML = '';
     },
     fillItemList() {
-      for (let item of this.storage) {
-        const listItem = createTODOElement(item, this);
+      for (let item of this.storageManager.storage) {
+        const listItem = createTODOElement(this, item, this.storageManager);
         this.itemList.append(listItem.itemLi);
       }
     },
     getIndexOfTask(task) {
-      for (let i = 0; i < this.storage.length; i++) {
-        if (task.id === this.storage[i].id) return i;
+      for (let i = 0; i < this.storageManager.storage.length; i++) {
+        if (task.id === this.storageManager.storage[i].id) return i;
       }
       return -1;
     },
     async saveDataToStorage() {
-      await storageManager.saveData(pageTitle, this.storage);
+      await this.storageManager.saveData(pageTitle);
     },
     async getDataFromStorage() {
-      if (!window.localStorage.getItem(pageTitle)) {
-        window.localStorage.setItem(pageTitle, JSON.stringify(this.storage));
-      }
-      this.storage = await storageManager.getData(pageTitle);
+      await this.storageManager.getData(pageTitle);
       this.clearItemList();
       this.fillItemList();
     }
   }
 }
 
+const createSwitchingButtonContainer = () => {
+  const content = document.createElement('div');
+  content.classList.add('d-flex', 'justify-content-between', 'mb-3');
+  const switchingButton = document.createElement('button');
+  switchingButton.classList.add('btn', 'btn-primary');
+  content.append(switchingButton);
+
+  return {
+    content,
+    switchingButton
+  }
+}
+
 const createApp = async (container = document.querySelector('.app'), headerText = 'Я') => {
   const appContainer = createContainer();
   const appHeader = createAppHeader(headerText);
-  const storageManager = await createStorageManager();
+  const storageManager = createStorageManager();
+  await storageManager.configStorageManager(headerText);
+
   const nav = createNav();
 
   const taskListComponent = createTaskListComponent(headerText, storageManager);
-  taskListComponent.getDataFromStorage();
-  storageManager.switchingButton.addEventListener(
-    'click',
-    async () => {
-      await taskListComponent.getDataFromStorage();
-    }
-  )
+  await taskListComponent.getDataFromStorage();
 
   const inputGroup = createInputGroup();
   configTaskInput(inputGroup.input, inputGroup.button);
-  configTasksStorage(inputGroup.button, inputGroup.input, taskListComponent, headerText);
+  // configTasksStorage(inputGroup.button, inputGroup.input, storageManager, headerText);
+  inputGroup.button.addEventListener(
+    'click',
+    async () => {
+      await taskListComponent.addNewTask({
+        name: inputGroup.input.value,
+        done: false,
+        owner: headerText,
+      });
+      inputGroup.button.disabled = true;
+      inputGroup.input.value = '';
+      await taskListComponent.getDataFromStorage();;
+    }
+  )
+
+  const switchingButtonKit = createSwitchingButtonContainer();
+  switchingButtonKit.switchingButton.textContent = storageManager.currentStorage;
+  switchingButtonKit.switchingButton.addEventListener(
+    'click',
+    async () => {
+      await storageManager.switchStorageManager();
+      switchingButtonKit.switchingButton.textContent = storageManager.currentStorage;
+      await taskListComponent.getDataFromStorage();
+    }
+  );
 
   if (nav !== undefined) {
     appContainer.append(nav);
   }
 
-  appContainer.append(appHeader, inputGroup.inputDiv, storageManager.content, taskListComponent.itemList);
+  appContainer.append(appHeader, inputGroup.inputDiv, switchingButtonKit.content, taskListComponent.itemList);
   container.classList.add('my-5');
   container.append(appContainer);
 };
