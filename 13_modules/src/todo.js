@@ -143,6 +143,14 @@ const createTaskListComponent = (pageTitle, storageManager) => {
       this.clearItemList();
       this.fillItemList();
     },
+    async saveDataToStorage() {
+      await this.storageManager.saveData(pageTitle);
+    },
+    async getDataFromStorage() {
+      await this.storageManager.getData(pageTitle);
+      this.clearItemList();
+      this.fillItemList();
+    },
     clearItemList() {
       this.itemList.innerHTML = '';
     },
@@ -157,14 +165,6 @@ const createTaskListComponent = (pageTitle, storageManager) => {
         if (task.id === this.storageManager.storage[i].id) return i;
       }
       return -1;
-    },
-    async saveDataToStorage() {
-      await this.storageManager.saveData(pageTitle);
-    },
-    async getDataFromStorage() {
-      await this.storageManager.getData(pageTitle);
-      this.clearItemList();
-      this.fillItemList();
     }
   }
 }
@@ -195,7 +195,6 @@ const createApp = async (container = document.querySelector('.app'), headerText 
 
   const inputGroup = createInputGroup();
   configTaskInput(inputGroup.input, inputGroup.button);
-  // configTasksStorage(inputGroup.button, inputGroup.input, storageManager, headerText);
   inputGroup.button.addEventListener(
     'click',
     async () => {
@@ -206,7 +205,6 @@ const createApp = async (container = document.querySelector('.app'), headerText 
       });
       inputGroup.button.disabled = true;
       inputGroup.input.value = '';
-      // await taskListComponent.getDataFromStorage();;
     }
   )
 

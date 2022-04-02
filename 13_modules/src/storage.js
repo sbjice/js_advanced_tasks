@@ -65,16 +65,16 @@ function createStorageManager() {
         await this.server.changeTodoItem(data);
       }
     },
-    getCurrentStorage() {
-      this.currentStorage = 'localStorage';
-      if (window.localStorage.getItem('storageAddress')) this.currentStorage = JSON.parse(window.localStorage.getItem('storageAddress'));
-      else window.localStorage.setItem('storageAddress', JSON.stringify(this.currentStorage));
-    },
     async configStorageManager(pageTitle) {
       this.pageTitle = pageTitle;
       this.getCurrentStorage();
       await this.getStorageManager();
       this.getData(pageTitle);
+    },
+    getCurrentStorage() {
+      this.currentStorage = 'localStorage';
+      if (window.localStorage.getItem('storageAddress')) this.currentStorage = JSON.parse(window.localStorage.getItem('storageAddress'));
+      else window.localStorage.setItem('storageAddress', JSON.stringify(this.currentStorage));
     },
     changeStorageAddress() {
       window.localStorage.setItem('storageAddress', JSON.stringify(this.currentStorage));
