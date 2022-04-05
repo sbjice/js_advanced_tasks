@@ -1,4 +1,5 @@
 const cssPromises = {};
+
 const API = 'https://www.swapi.tech/api/films'
 
 const appContainer = document.querySelector('.app');
@@ -23,32 +24,21 @@ function loadResourses(src) {
 }
 
 function renderPage(moduleName, apiURL, css, container) {
+  container.innerHTML = '';
   Promise.all([moduleName, apiURL, css].map(src => loadResourses(src)))
     .then(([pageModule, data]) => {
-      container.innerHTML = '';
-      container.append(pageModule.render(data));
+      const obj = pageModule.render(data);
+      if (obj.container) {
+        container.append(obj.container);
+        document.title = obj.title;
+      } else {
+        container.append(obj);
+        document.title = 'Star Wars Catalog';
+      }
     });
 }
 
-const searchParams = new URLSearchParams(location.search);
-const filmNumber = searchParams.get('film');
-if (!filmNumber){
-  renderPage(
-    './episodes-list.js',
-    API,
-    'https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css',
-    appContainer
-  );
-} else {
-  renderPage(
-    './episode-details.js',
-    `${API}/${filmNumber}`,
-    'https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css',
-    appContainer
-  );
-}
-
-window.addEventListener('popstate', (event) => {
+function renderHandler() {
   const searchParams = new URLSearchParams(location.search);
   const filmNumber = searchParams.get('film');
   if (!filmNumber){
@@ -66,6 +56,12 @@ window.addEventListener('popstate', (event) => {
       appContainer
     );
   }
+}
+
+await renderHandler();
+
+window.addEventListener('popstate', async () => {
+  await renderHandler();
 });
 
 

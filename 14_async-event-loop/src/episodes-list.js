@@ -1,11 +1,10 @@
 export function render(data) {
   const container = document.createElement('div');
-  container.classList.add('container', 'p-4');
-
+  container.classList.add('container', 'p-5', 'bg-light', 'rounded', 'my-5');
 
   for (let item of data.result) {
     const cardLink = document.createElement('a');
-    cardLink.classList.add('btn', 'btn-light', 'w-50');
+    cardLink.classList.add('btn', 'btn-light', 'w-100');
     cardLink.href = `?film=${item.uid}`;
     const card = document.createElement('div');
     card.classList.add('card');
@@ -24,8 +23,10 @@ export function render(data) {
     cardLink.addEventListener(
       'click',
       (event) => {
-        // event.preventDefault();
-        // history.pushState({'state':''}, '', cardLink.href);
+        event.preventDefault();
+        history.pushState({'state':''}, '', cardLink.href);
+        let popStateEvent = new PopStateEvent('popstate', { state: null });
+        dispatchEvent(popStateEvent);
       }
     );
     container.append(cardLink);
