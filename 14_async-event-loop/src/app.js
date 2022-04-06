@@ -24,10 +24,13 @@ function loadResourses(src) {
 }
 
 function renderPage(moduleName, apiURL, css, container) {
-  container.innerHTML = '';
+  container.innerHTML = 'Loading Data...';
+  container.classList.add('container', 'd-flex', 'justify-content-between', 'lead');
   Promise.all([moduleName, apiURL, css].map(src => loadResourses(src)))
-    .then(([pageModule, data]) => {
-      const obj = pageModule.render(data);
+    .then(async ([pageModule, data]) => {
+      const obj = await pageModule.render(data);
+      container.classList.remove('container', 'd-flex', 'justify-content-between', 'lead');
+      container.innerHTML = '';
       if (obj.container) {
         container.append(obj.container);
         document.title = obj.title;

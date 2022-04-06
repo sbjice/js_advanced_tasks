@@ -1,9 +1,12 @@
-function drawItems(data) {
-  Promise.all(data.map(src => fetch(src)))
-    .then(data => data.map(async item => await item.json()));
+function loadData(src) {
+  return fetch(src).then(res => res.json());
 }
 
-export function render(data) {
+function getItems(data) {
+  return Promise.all(data.map(item => loadData(item)))
+}
+
+export async function render(data) {
   console.log(data);
   const container = document.createElement('div');
   container.classList.add('container', 'p-5', 'bg-light', 'rounded', 'my-5');
@@ -23,14 +26,30 @@ export function render(data) {
   planetsHeader.textContent = 'Planets';
   const planetsList = document.createElement('ul');
   planetsList.style.listStyleType = 'none';
+  planetsList.classList.add('p-0')
 
-  const planets = drawItems(data.result.properties.planets);
-  console.log(planets);
-  // planets.forEach(item => {
-  //   const li = document.createElement('li');
-  //   li.textContent = item.value;
-  //   planetsList.append(li);
-  // });
+  const planets = await getItems(data.result.properties.planets);
+  planets.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item.result.properties.name;
+    planetsList.append(li);
+  });
+
+  const speciesHeader = document.createElement('h2');
+  speciesHeader.textContent = 'Planets';
+  const speciesList = document.createElement('ul');
+  speciesList.style.listStyleType = 'none';
+  speciesList.classList.add('p-0')
+  console.log(`number of species: ${data.result.properties.species.length},
+  number of planets: ${data.result.properties.planets.length},`)
+
+  const species = await getItems(data.result.properties.species);
+  console.log(species);
+  species.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item.result.properties.name;
+    speciesList.append(li);
+  });
 
 
   const backButton = document.createElement('a');
@@ -51,7 +70,7 @@ export function render(data) {
     }
   );
 
-  cardBody.append(cardTitle, cardText, planetsHeader, planetsList, backButton);
+  cardBody.append(cardTitle, cardText, planetsHeader, planetsList, speciesHeader, speciesList, backButton);
   card.append(cardBody);
 
   container.append(card);
