@@ -36,7 +36,7 @@ export async function render(data) {
   });
 
   const speciesHeader = document.createElement('h2');
-  speciesHeader.textContent = 'Planets';
+  speciesHeader.textContent = 'Species';
   const speciesList = document.createElement('ul');
   speciesList.style.listStyleType = 'none';
   speciesList.classList.add('p-0')
