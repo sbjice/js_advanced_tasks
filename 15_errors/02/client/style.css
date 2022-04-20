@@ -1,0 +1,11 @@
+.toaster {
+  height: auto;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  list-style: none;
+}
+
+.toast {
+  min-height: 50px;
+}
