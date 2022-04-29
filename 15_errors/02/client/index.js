@@ -2,6 +2,11 @@ const API = 'http://localhost:3000/api/products';
 const updateLaterText = 'Произошла ошибка, попробуйте обновить страницу позже. ';
 const cssPromises = {};
 
+const resources = [
+  './style.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css'
+]
+
 
 function loadResource(src) {
   if (src.endsWith('.js')) {
@@ -21,8 +26,7 @@ function loadResource(src) {
   }
 }
 
-loadResource('./style.css');
-loadResource('https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css');
+resources.forEach(loadResource);
 
 function createToaster(){
   const toaster = document.createElement('ul');
@@ -42,7 +46,7 @@ function createToaster(){
                           'align-items-center');
       toast.textContent = toastText;
       this.toaster.append(toast);
-      console.log('toast added');
+      // console.log('toast added');
       setTimeout(() => {
         toast.remove();
       },3000);
@@ -130,13 +134,13 @@ async function fillContainer(appContainer) {
       else toaster.addToast('Need retry');
     }
   }
-  console.log(products);
+  // console.log(products);
   if (products === 'Need retry') {
     const header = getErrorHeader();
     // toaster.addToast('Need retry');
     appContainer.append(header);
   } else if (products === 'Invalid JSON') {
-    const header = getErrorHeader(updateLaterText + products);
+    const header = getErrorHeader(updateLaterText);
     toaster.addToast('Invalid JSON');
     appContainer.append(header);
   } else if (products === null) {
@@ -153,4 +157,14 @@ const appContainer = getAppContainer();
 const toaster = createToaster();
 document.body.append(toaster.toaster);
 document.body.append(appContainer);
+
+window.addEventListener('offline', function(e) {
+  toaster.addToast('Going offline');
+});
+
+window.addEventListener('online', async function(e) {
+  toaster.addToast('Going offline');
+  appContainer.innerHTML = '';
+  await fillContainer(appContainer);
+});
 await fillContainer(appContainer);

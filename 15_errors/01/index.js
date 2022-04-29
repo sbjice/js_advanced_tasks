@@ -24,8 +24,8 @@ function fetchAvatarImage(userId) {
 }
 
 export async function getAvatarUrl(userId) {
-  const image = await fetchAvatarImage(userId);
   try{
+    const image = await fetchAvatarImage(userId);
     return image.url;
   } catch(error) {
     return '/images/default.jpg';
