@@ -23,6 +23,7 @@ export default class BaseComponent {
     this.showLoader = showLoader;
     this.createErrorList();
     this.showErrorState = showErrorState;
+    this.createRetryButton();
   }
 
   errors = [];
@@ -30,6 +31,7 @@ export default class BaseComponent {
   loadedData = null;
 
   async getElement() {
+
     const rootElement = document.createElement('div', 'd-flex', 'flex-column');
     this.rootElement = rootElement;
     this.rootElement.append(this.spinner);
@@ -40,16 +42,16 @@ export default class BaseComponent {
     try {
       this.loadedData = await this.fetch();
     } catch (error) {
+      this.errors = [];
       this.errors.push(error);
     }
 
     if (this.showErrorState) this.fillErrorsList();
     this.hideSpinner();
-    self = this;
 
     return {
       rootElement: this.rootElement,
-      loadedData: self.loadedData,
+      loadedData: this.loadedData,
     };
   }
 
@@ -78,7 +80,7 @@ export default class BaseComponent {
 
   createErrorList() {
     const errorsList = document.createElement('ul');
-    errorsList.classList.add('w-100', 'd-flex', 'flex-column', 'p-0');
+    errorsList.classList.add('w-25', 'd-flex', 'flex-column', 'p-0');
     errorsList.style.listStyleType = 'none';
     this.errorsList = errorsList;
   }
@@ -92,10 +94,27 @@ export default class BaseComponent {
       errorItem.style.minHeight = '50px';
       this.errorsList.append(errorItem);
     })
+    this.rootElement.append(this.retryButton);
+  }
+
+  createRetryButton() {
+    const retryButton = document.createElement('a');
+    retryButton.classList.add('btn', 'btn-primary', 'w-25');
+    retryButton.addEventListener(
+      'click',
+      async () => {
+        this.rootElement.remove();
+        this.clearErrorsList();
+        await this.getElement();
+      }
+    );
+    retryButton.textContent = 'Попробовать снова';
+    this.retryButton = retryButton;
   }
 
   clearErrorsList() {
     this.errorsList.innerHTML = '';
+    this.retryButton.remove();
   }
 
   showErrorsList() {
