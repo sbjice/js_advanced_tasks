@@ -1,0 +1,13 @@
+.toaster {
+  height: auto;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  list-style: none;
+}
+
+.toast_js {
+  opacity: 1;
+  min-height: 50px;
+}
+
