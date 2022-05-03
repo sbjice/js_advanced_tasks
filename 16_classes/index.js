@@ -148,6 +148,7 @@ export class AddToCartComponent extends BaseComponent {
     if (this.rootElement) this.rootElement.innerHTML = '';
     if (this.errorsList) {
       this.clearErrorsList();
+      this.errorsList.remove();
       this.errors = [];
     }
 
@@ -161,6 +162,7 @@ export class AddToCartComponent extends BaseComponent {
     try {
       this.cartValue = await this.fetch();
     } catch (error) {
+      this.clearErrorsList();
       this.errors = [];
       this.errors.push(error);
       this.cartValue = 0;

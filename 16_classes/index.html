@@ -30,7 +30,6 @@
 
     let observer = new IntersectionObserver(async () => {
       await cart2.getElement();
-      console.log(cart2.errors);
     }, options);
 
     observer.observe(block3);
