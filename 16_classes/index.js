@@ -80,7 +80,7 @@ export class BaseComponent {
 
   createErrorList() {
     const errorsList = document.createElement('ul');
-    errorsList.classList.add('w-100', 'd-flex', 'flex-column', 'p-0');
+    errorsList.classList.add('w-100', 'd-flex', 'flex-column', 'p-0', 'm-0');
     errorsList.style.listStyleType = 'none';
     this.errorsList = errorsList;
   }
@@ -171,6 +171,7 @@ export class AddToCartComponent extends BaseComponent {
   }
 
   needUI = false;
+  UIDrawn = false;
 
   set cartValue(value) {
     if (value < 1) {
@@ -189,7 +190,7 @@ export class AddToCartComponent extends BaseComponent {
 
   createStartCartUI() {
     const element = document.createElement('div');
-    element.classList.add('w-25', 'd-flex', 'flex-row');
+    element.classList.add('w-25', 'd-flex', 'flex-row', 'mb-2');
     element.style.minHeight = '100px';
 
     const addToCartButton = document.createElement('a');
@@ -219,7 +220,7 @@ export class AddToCartComponent extends BaseComponent {
 
   createCartUIForValue() {
     const element = document.createElement('div');
-    element.classList.add('w-25', 'd-flex', 'flex-row');
+    element.classList.add('w-25', 'd-flex', 'flex-row', 'mb-2');
     element.style.minHeight = '10px';
 
     const decreaseButton = document.createElement('a');
@@ -272,13 +273,18 @@ export class AddToCartComponent extends BaseComponent {
   changeCartUI() {
     if (this.cartValue == 0) {
       this.createStartCartUI();
+      this.UIDrawn = false;
       return;
     }
     if (this.cartValue > 0) {
       if (!this.needUI) {
         this.createStartCartUI();
+        this.UIDrawn = false;
       } else {
-        this.createCartUIForValue();
+        if(!this.UIDrawn) {
+          this.createCartUIForValue();
+          this.UIDrawn = true;
+        }
         this.valueText.textContent = this.cartValue;
       }
     }

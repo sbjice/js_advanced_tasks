@@ -15,9 +15,20 @@
     // console.log(data);
 
     const cart = new AddToCartComponent('#new-block', true, true);
-    const cartData = await cart.getElement();
-    console.log(cartData);
-    // setTimeout(() => { base.clearErrorsList() }, 3000);
+    // const cartData = await cart.getElement();
+    // console.log(cartData);
+
+    const cart1 = new AddToCartComponent('#new-block', true, true);
+    // const cartData1 = await cart1.getElement();
+    // console.log(cartData1);
+
+
+    const cart2 = new AddToCartComponent('#new-block', true, true);
+    Promise.all([
+      cart.getElement(),
+      cart1.getElement(),
+      cart2.getElement()
+    ])
   </script>
 </head>
 <body>
