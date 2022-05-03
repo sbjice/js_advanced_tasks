@@ -135,11 +135,22 @@ export class BaseComponent {
 
 
 export class AddToCartComponent extends BaseComponent {
-  constructor(selector, showLoader = true, showErrorState = true) {
-    super(selector, showLoader = true, showErrorState = true)
+  constructor(selector, showLoader = true, showErrorState = true, timeToWait = 2) {
+    super(selector, showLoader = true, showErrorState = true);
+    this.timeToWait = timeToWait;
   }
 
+  needUI = false;
+  UIDrawn = false;
+
   async getElement() {
+
+    if (this.rootElement) this.rootElement.innerHTML = '';
+    if (this.errorsList) {
+      this.clearErrorsList();
+      this.errors = [];
+    }
+
     const rootElement = document.createElement('div', 'd-flex', 'flex-column');
     this.rootElement = rootElement;
     this.rootElement.append(this.spinner);
@@ -170,15 +181,11 @@ export class AddToCartComponent extends BaseComponent {
     };
   }
 
-  needUI = false;
-  UIDrawn = false;
-
   set cartValue(value) {
     if (value < 1) {
       this._cartValue = 0;
       this.needUI = false;
-    }
-    else {
+    } else {
       this._cartValue = value;
       this.needUI = true;
     }
@@ -249,7 +256,7 @@ export class AddToCartComponent extends BaseComponent {
 
 
     const valueText = document.createElement('p');
-    valueText.classList.add('m-0','lead', 'text-center', 'align-middle');
+    valueText.classList.add('m-0', 'lead', 'text-center', 'align-middle');
     valueText.textContent = this.cartValue;
     valueText.style.width = '33%';
 
@@ -281,7 +288,7 @@ export class AddToCartComponent extends BaseComponent {
         this.createStartCartUI();
         this.UIDrawn = false;
       } else {
-        if(!this.UIDrawn) {
+        if (!this.UIDrawn) {
           this.createCartUIForValue();
           this.UIDrawn = true;
         }
@@ -290,9 +297,8 @@ export class AddToCartComponent extends BaseComponent {
     }
   }
 
-
   async fetch() {
-    await wait(2000);
+    await wait(this.timeToWait * 1000);
     return 2;
   }
 }

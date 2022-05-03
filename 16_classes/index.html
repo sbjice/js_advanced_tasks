@@ -14,26 +14,33 @@
     // const data = await base.getElement();
     // console.log(data);
 
-    const cart = new AddToCartComponent('#new-block', true, true);
+    // const cart = new AddToCartComponent('#new-block', true, true);
     // const cartData = await cart.getElement();
     // console.log(cartData);
-
     const cart1 = new AddToCartComponent('#new-block', true, true);
-    // const cartData1 = await cart1.getElement();
-    // console.log(cartData1);
+    const cart2 = new AddToCartComponent('#block3', true, true, 6);
 
+    await cart1.getElement();
 
-    const cart2 = new AddToCartComponent('#new-block', true, true);
-    Promise.all([
-      cart.getElement(),
-      cart1.getElement(),
-      cart2.getElement()
-    ])
+    let options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: [0]
+    };
+
+    let observer = new IntersectionObserver(async () => {
+      await cart2.getElement();
+      console.log(cart2.errors);
+    }, options);
+
+    observer.observe(block3);
+
   </script>
 </head>
 <body>
-  <div id="block" class="container h-100"></div>
-  <div id="new-block" class="container h-100"></div>
+  <!-- <div id="block" class="container h-100"></div> -->
+  <div id="new-block" class="container" style="height: 130vh;"></div>
+  <div id="block3" class="container h-100"></div>
 
 </body>
 </html>
