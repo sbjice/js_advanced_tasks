@@ -8,16 +8,21 @@
   <link rel="icon" type="image/x-icon" href="icon.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
   <script type="module">
-    import BaseComponent from './index.js';
+    import { BaseComponent, AddToCartComponent} from './index.js';
 
-    const base = new BaseComponent('#block', true, true);
-    const data = await base.getElement();
-    console.log(data);
+    // const base = new BaseComponent('#block', true, true);
+    // const data = await base.getElement();
+    // console.log(data);
+
+    const cart = new AddToCartComponent('#new-block', true, true);
+    const cartData = await cart.getElement();
+    console.log(cartData);
     // setTimeout(() => { base.clearErrorsList() }, 3000);
   </script>
 </head>
 <body>
-  <div id="block" class="container"></div>
+  <div id="block" class="container h-100"></div>
+  <div id="new-block" class="container h-100"></div>
 
 </body>
 </html>
