@@ -4,11 +4,11 @@ class ComponentError extends Error {
   }
 }
 
-export function wait(ms) {
+export function wait(ms, valueToReturn = 0) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (ms > 5000) reject('too long');
-      resolve();
+      resolve(valueToReturn);
     }, ms);
   });
 }
@@ -39,6 +39,7 @@ export class BaseComponent {
     this.selector.append(this.rootElement);
 
     if (this.showLoader) this.showSpinner();
+    else this.hideSpinner()
     try {
       this.loadedData = await this.fetch();
     } catch (error) {
@@ -46,7 +47,7 @@ export class BaseComponent {
       this.errors.push(error);
     }
 
-    if (this.showErrorState) this.fillErrorsList();
+    this.fillErrorsList();
     this.hideSpinner();
 
     return {
@@ -87,13 +88,15 @@ export class BaseComponent {
 
   fillErrorsList() {
     if (!this.errors.length) return;
-    this.errors.forEach(item => {
-      const errorItem = document.createElement('li');
-      errorItem.classList.add('rounded', 'bg-danger', 'd-flex', 'align-items-center', 'p-2');
-      errorItem.textContent = item;
-      errorItem.style.minHeight = '50px';
-      this.errorsList.append(errorItem);
-    })
+    if(this.showErrorState) {
+      this.errors.forEach(item => {
+        const errorItem = document.createElement('li');
+        errorItem.classList.add('rounded', 'bg-danger', 'd-flex', 'align-items-center', 'p-2');
+        errorItem.textContent = item;
+        errorItem.style.minHeight = '50px';
+        this.errorsList.append(errorItem);
+      })
+    }
     this.rootElement.append(this.retryButton);
   }
 
@@ -135,9 +138,10 @@ export class BaseComponent {
 
 
 export class AddToCartComponent extends BaseComponent {
-  constructor(selector, showLoader = true, showErrorState = true, timeToWait = 2) {
-    super(selector, showLoader = true, showErrorState = true);
+  constructor(selector, showLoader = true, showErrorState = true, timeToWait = 2, valueToReturn = 0) {
+    super(selector, showLoader, showErrorState);
     this.timeToWait = timeToWait;
+    this.valueToReturn = valueToReturn;
   }
 
   needUI = false;
@@ -159,6 +163,7 @@ export class AddToCartComponent extends BaseComponent {
     this.selector.append(this.rootElement);
 
     if (this.showLoader) this.showSpinner();
+    else this.hideSpinner();
     try {
       this.cartValue = await this.fetch();
     } catch (error) {
@@ -172,10 +177,12 @@ export class AddToCartComponent extends BaseComponent {
       this.needUI = true;
     }
 
-    if (this.showErrorState) this.fillErrorsList();
+    this.fillErrorsList();
     this.hideSpinner();
-    this.changeCartUI();
-    this.rootElement.append(this.element);
+    if (!this.errors.length) {
+      this.changeCartUI();
+      this.rootElement.append(this.element);
+    }
 
     return {
       rootElement: this.rootElement,
@@ -280,7 +287,7 @@ export class AddToCartComponent extends BaseComponent {
   }
 
   changeCartUI() {
-    if (this.cartValue == 0) {
+    if (this.cartValue === 0) {
       this.createStartCartUI();
       this.UIDrawn = false;
       return;
@@ -300,7 +307,6 @@ export class AddToCartComponent extends BaseComponent {
   }
 
   async fetch() {
-    await wait(this.timeToWait * 1000);
-    return 2;
+    return await wait(this.timeToWait * 1000, this.valueToReturn);
   }
 }

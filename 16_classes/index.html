@@ -17,8 +17,8 @@
     // const cart = new AddToCartComponent('#new-block', true, true);
     // const cartData = await cart.getElement();
     // console.log(cartData);
-    const cart1 = new AddToCartComponent('#new-block', true, true);
-    const cart2 = new AddToCartComponent('#block3', true, true, 6);
+    const cart1 = new AddToCartComponent('#new-block', true, true, 3, 3);
+    const cart2 = new AddToCartComponent('#block3', true, true, 3, 2);
 
     await cart1.getElement();
 
@@ -29,6 +29,7 @@
     };
 
     let observer = new IntersectionObserver(async () => {
+      console.log('called');
       await cart2.getElement();
     }, options);
 
@@ -37,7 +38,7 @@
   </script>
 </head>
 <body>
-  <!-- <div id="block" class="container h-100"></div> -->
+  <div id="block" class="container h-100"></div>
   <div id="new-block" class="container" style="height: 130vh;"></div>
   <div id="block3" class="container h-100"></div>
 
