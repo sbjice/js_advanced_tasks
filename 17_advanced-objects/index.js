@@ -126,7 +126,8 @@ export class PrototypeChecker {
       (e) => {
         e.preventDefault();
         this.clearErrorsList();
-        if(this.prototypeBlocksContainer) this.prototypeBlocksContainer.remove();
+        if (!this.input.value) return;
+        if (this.prototypeBlocksContainer) this.prototypeBlocksContainer.remove();
         const errorMessages = this.validateInputValue();
         this.fillErrorsList();
         if (errorMessages) {
@@ -135,7 +136,8 @@ export class PrototypeChecker {
         }
         this.input.classList.remove('border-danger');
         this.createPrototypeBlocksContainer();
-        this.getPrototypesChain(this.inspectableObject[this.input.value]);
+        const obj = this.inspectableObject[this.input.value];
+        this.getPrototypesChain(obj);
 
         this.protos.forEach(item => {
           this.getPrototypeProperties(item);
@@ -221,7 +223,7 @@ export class PrototypeChecker {
 
   createReprForProps(prot, props) {
     const prototypeBlock = document.createElement('div');
-    prototypeBlock.classList.add('d-flex', 'flex-column', 'w-100', 'mb-3', 'rounded', 'border');
+    prototypeBlock.classList.add('d-flex', 'flex-column', 'w-100', 'mb-3', 'rounded', 'border', 'p-2');
 
     const protBlockHeader = document.createElement('h3');
     protBlockHeader.classList.add('lead');
@@ -235,11 +237,11 @@ export class PrototypeChecker {
       propItem.classList.add('rounded', 'd-flex', 'flex-row', 'rounded', 'mb-0', 'border');
 
       const propName = document.createElement('p')
-      propName.classList.add('mb-0', 'bg-success','w-50');
+      propName.classList.add('mb-0', 'bg-success', 'w-50', 'p-2');
       propName.textContent = item.prop;
 
       const propType = document.createElement('p')
-      propType.classList.add('mb-0', 'bg-primary','w-50');
+      propType.classList.add('mb-0', 'bg-primary', 'w-50', 'p-2');
       propType.textContent = item.type;
 
       propItem.append(propName, propType);
