@@ -47,7 +47,6 @@ export class PrototypeChecker {
           console.log('module import');
           try {
             const module = await import(this.input.value);
-            console.log(module.default);
             this.input.classList.remove('border-danger');
             this.createPrototypeBlocksContainer();
             this.getPrototypesChain(module.default);
@@ -87,6 +86,9 @@ export class PrototypeChecker {
     this.errors = [];
     if (!this.inspectableObject || !this.inspectableObject[this.input.value]) {
       this.errors.push('Нет такого элемента');
+    }
+    if (typeof this.inspectableObject[this.input.value] !== 'function') {
+      this.errors.push('Элемент не является функцией или конструктором');
     }
     return this.errors.length ? this.errors : null;
   }
