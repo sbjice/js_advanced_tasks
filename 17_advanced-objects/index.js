@@ -1,87 +1,3 @@
-// function getPrototype(obj) {
-//   const prot = Object.getPrototypeOf(obj);
-//   const dat = [];
-//   if (prot) {
-//     // if (typeof prot === 'function') dat.push(prot.name);
-//     // else dat.push(prot);
-//     // dat.push(obj.name, ...getPrototype(prot));
-//     dat.push(obj, ...getPrototype(prot));
-//   }
-//   return dat;
-// }
-
-// function getPrototypesChain(obj = window) {
-//   if (!obj) return null;
-//   let elem = obj;
-//   const protos = [];
-//   while (elem) {
-//     if (elem.name !== undefined) {
-//       elem.name === '' ? null : protos.push(elem.name);
-//     } else protos.push(elem.constructor.name);
-//     elem = Object.getPrototypeOf(elem);
-//   }
-
-//   return protos;
-// }
-
-// function getPrototypeProperties(prot, obj = window) {
-//   const props = Object.getOwnPropertyNames(obj[prot]);
-//   const propsArr = props.map(prop => {
-//     return {
-//       prop,
-//       type: typeof obj[prot][prop],
-//     }
-//   })
-//   return propsArr;
-// }
-
-// function createReprForProps(prot, props) {
-//   const prototypeBlock = document.createElement('div');
-//   prototypeBlock.classList.add('d-flex', 'flex-column', 'w-100', 'mb-3', 'rounded', 'border');
-
-//   const protBlockHeader = document.createElement('h3');
-//   protBlockHeader.classList.add('lead');
-//   protBlockHeader.textContent = prot;
-
-//   const propsList = document.createElement('ol');
-//   propsList.classList.add('d-flex', 'flex-column', 'p-0', 'mb-0', 'rounded');
-
-//   props.forEach(item => {
-//     const propItem = document.createElement('li');
-//     propItem.classList.add('rounded', 'd-flex', 'flex-column', 'rounded', 'mb-0');
-
-//     const propName = document.createElement('p')
-//     propName.classList.add('mb-0', 'bg-success', 'py-3');
-//     propName.textContent = item.prop;
-//     propName.style.minHeight = '50px';
-
-//     const propType = document.createElement('p')
-//     propType.classList.add('mb-0', 'bg-primary', 'py-auto');
-//     propType.textContent = item.type;
-//     propType.style.minHeight = '50px';
-
-//     propItem.append(propName, propType);
-//     propsList.append(propItem)
-//   });
-
-//   prototypeBlock.append(protBlockHeader, propsList);
-//   return prototypeBlock;
-// }
-
-
-// const protos = getPrototypesChain(window['HTMLInputElement']);
-// protos.forEach(item => {
-//   const protosProps = getPrototypeProperties(item);
-//   const protBlock = createReprForProps(item, protosProps);
-//   document.body.append(protBlock);
-// });
-
-
-// console.log(getPrototypes(window['HTMLInputElement']));
-// console.log(getPrototypes(window['EventTarget']));
-
-
-
 export class PrototypeChecker {
   constructor(inspectableObject = window) {
     this.inspectableObject = inspectableObject;
@@ -111,7 +27,6 @@ export class PrototypeChecker {
     submit.textContent = 'Показать цепочку прототипов';
     submit.style.whiteSpace = 'nowrap';
 
-
     this.form = form;
     this.input = input;
     this.submit = submit;
@@ -123,28 +38,46 @@ export class PrototypeChecker {
   configSubmitButton() {
     this.submit.addEventListener(
       'click',
-      (e) => {
+      async (e) => {
         e.preventDefault();
         this.clearErrorsList();
-        if (!this.input.value) return;
         if (this.prototypeBlocksContainer) this.prototypeBlocksContainer.remove();
-        const errorMessages = this.validateInputValue();
-        this.fillErrorsList();
-        if (errorMessages) {
-          this.input.classList.add('border-danger');
-          return;
+        if (!this.input.value) return;
+        if (this.input.value.endsWith('.js')) {
+          console.log('module import');
+          try {
+            const module = await import(this.input.value);
+            console.log(module.default);
+            this.input.classList.remove('border-danger');
+            this.createPrototypeBlocksContainer();
+            this.getPrototypesChain(module.default);
+
+            this.protos.forEach(item => {
+              this.getPrototypePropertiesFromModule(module.default);
+              const protBlock = this.createReprForProps(item, this.propsArr);
+              this.prototypeBlocksContainer.append(protBlock);
+            });
+          } catch (e) {
+            this.errors.push(e.message);
+            this.fillErrorsList();
+          }
+        } else {
+          const errorMessages = this.validateInputValue();
+          this.fillErrorsList();
+          if (errorMessages) {
+            this.input.classList.add('border-danger');
+            return;
+          }
+          this.input.classList.remove('border-danger');
+          this.createPrototypeBlocksContainer();
+          this.getPrototypesChain(this.inspectableObject[this.input.value]);
+
+          this.protos.forEach(item => {
+            this.getPrototypeProperties(item);
+            const protBlock = this.createReprForProps(item, this.propsArr);
+            this.prototypeBlocksContainer.append(protBlock);
+          });
         }
-        this.input.classList.remove('border-danger');
-        this.createPrototypeBlocksContainer();
-        const obj = this.inspectableObject[this.input.value];
-        this.getPrototypesChain(obj);
-
-        this.protos.forEach(item => {
-          this.getPrototypeProperties(item);
-          const protBlock = this.createReprForProps(item, this.propsArr);
-          this.prototypeBlocksContainer.append(protBlock);
-        });
-
       }
     )
   }
@@ -221,6 +154,19 @@ export class PrototypeChecker {
     this.propsArr = propsArr;
   }
 
+  getPrototypePropertiesFromModule(module) {
+    const props = Object.getOwnPropertyNames(module);
+    const propsArr = props.map(prop => {
+      return {
+        prop,
+        type: typeof module[prop],
+      }
+    })
+    this.propsArr = propsArr;
+  }
+
+
+
   createReprForProps(prot, props) {
     const prototypeBlock = document.createElement('div');
     prototypeBlock.classList.add('d-flex', 'flex-column', 'w-100', 'mb-3', 'rounded', 'border', 'p-2');
@@ -258,4 +204,6 @@ export class PrototypeChecker {
     this.prototypeBlocksContainer = prototypeBlocksContainer;
     this.container.append(this.prototypeBlocksContainer);
   }
+
+
 }
