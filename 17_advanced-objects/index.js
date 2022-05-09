@@ -87,7 +87,7 @@ export class PrototypeChecker {
     if (!this.inspectableObject || !this.inspectableObject[this.input.value]) {
       this.errors.push('Нет такого элемента');
     }
-    if (typeof this.inspectableObject[this.input.value] !== 'function') {
+    if (this.inspectableObject[this.input.value] && typeof this.inspectableObject[this.input.value] !== 'function') {
       this.errors.push('Элемент не является функцией или конструктором');
     }
     return this.errors.length ? this.errors : null;
