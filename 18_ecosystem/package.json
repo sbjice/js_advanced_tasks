@@ -2,12 +2,24 @@
   "private": true,
   "scripts": {
     "lint": "eslint ./",
-    "lint:report": "eslint ./"
+    "lint:report": "eslint ./",
+    "dev": "parcel index.html",
+    "build": "parcel build index.html"
   },
   "devDependencies": {
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-formatter-gitlab": "^2.1.0",
-    "eslint-plugin-import": "^2.22.1"
+    "eslint-plugin-import": "^2.22.1",
+    "parcel": "^2.5.0"
+  },
+  "name": "18_ecosystem",
+  "version": "1.0.0",
+  "author": "Sarkhan",
+  "description": "",
+  "dependencies": {
+    "card-validator": "^8.1.1",
+    "inputmask": "^5.0.7",
+    "redom": "^3.27.3"
   }
 }
