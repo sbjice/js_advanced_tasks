@@ -1,6 +1,7 @@
 import {
   el,
-  mount
+  mount,
+  setAttr
 } from 'redom';
 import Inputmask from 'inputmask';
 let valid = require('card-validator');
@@ -40,9 +41,15 @@ let valid = require('card-validator');
 
 export class CreditCard {
   constructor() {
+
+    document.body.classList.add('h-100');
+    document.documentElement.classList.add('h-100');
     this.createComponentContainer();
     this.createFormContainer();
     this.createFormElements();
+
+    this.createImageContainer();
+    this.createImage();
 
     this.configCardNumberInput();
     this.configDateInput();
@@ -51,11 +58,15 @@ export class CreditCard {
 
     mount(document.body, this.container);
     mount(this.container, this.formContainer);
+    mount(this.container, this.imageContainer);
+
     mount(this.formContainer, this.cardNumber);
     mount(this.formContainer, this.dateInput);
     mount(this.formContainer, this.emailInput);
     mount(this.formContainer, this.cvvNumber);
     mount(this.formContainer, this.sumbitButton);
+
+    mount(this.imageContainer, this.image);
   }
 
   dateValid = false;
@@ -65,12 +76,12 @@ export class CreditCard {
   re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
   createComponentContainer() {
-    const container = el('div.container.my-5.p-0.d-flex.flex-row.credit-card-component');
+    const container = el('div.container.my-5.p-0.d-flex.flex-column.credit-card-component.mh-100');
     this.container = container;
   }
 
   createFormContainer() {
-    const formContainer = el('div.p-0.d-flex.flex-column.w-50');
+    const formContainer = el('div.p-0.d-flex.flex-column.w-100');
     this.formContainer = formContainer;
   }
 
@@ -134,6 +145,12 @@ export class CreditCard {
           this.activateSubmitButton();
           return;
         }
+        console.log(numberValidation);
+
+        if (numberValidation.card.type === 'visa') this.image.src = require('../assets/visa.png');
+        else if (numberValidation.card.type === 'mastercard') this.image.src = require('../assets/mastercard.png');
+        else this.image.src = require('../icon.png');
+        console.log(this.image.src);
         this.cardValid = true;
         this.activateSubmitButton();
       }
@@ -225,6 +242,16 @@ export class CreditCard {
         this.cvvNumber.classList.remove('border-danger');
       }
     )
+  }
+
+  createImageContainer(){
+    const imageContainer = el('div.p-0.d-flex.flex-column');
+    this.imageContainer = imageContainer;
+  }
+
+  createImage() {
+    const image = el('img.d-inline-flex.w-100',{alt: 'Картинка платежной системы', style: {maxWidth: 'none'}});
+    this.image = image;
   }
 
   activateSubmitButton() {
