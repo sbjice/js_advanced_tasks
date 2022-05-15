@@ -3,8 +3,8 @@
   "scripts": {
     "lint": "eslint ./",
     "lint:report": "eslint ./",
-    "dev": "parcel index.html",
-    "build": "parcel build index.html"
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
   },
   "devDependencies": {
     "eslint": "^7.15.0",

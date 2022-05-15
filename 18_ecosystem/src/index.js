@@ -1,47 +1,41 @@
 import {
   el,
-  mount,
-  setAttr
+  mount
 } from 'redom';
 import Inputmask from 'inputmask';
 let valid = require('card-validator');
 
+const cssPromises = {};
 
-// const cssPromises = {};
+function loadResourses(src) {
+  if (src.endsWith('.js')) {
+    return import(src);
+  }
+  if (src.endsWith('.css')) {
+    if (!cssPromises[src]) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = src;
+      cssPromises[src] = new Promise(resolve => {
+        link.addEventListener('load', () => resolve());
+      });
+      document.head.append(link);
+    }
+    return cssPromises[src];
+  }
+  return fetch(src).then(res => res.json());
+}
 
-// function loadResourses(src) {
-//   if (src.endsWith('.js')) {
-//     return import(src);
-//   }
-//   if (src.endsWith('.css')) {
-//     if (!cssPromises[src]) {
-//       const link = document.createElement('link');
-//       link.rel = 'stylesheet';
-//       link.href = src;
-//       cssPromises[src] = new Promise(resolve => {
-//         link.addEventListener('load', () => resolve());
-//       });
-//       document.head.append(link);
-//     }
-//     return cssPromises[src];
-//   }
-//   return fetch(src).then(res => res.json());
-// }
+const resources = [
+  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css'
+];
 
-// const resources = [
-//   'https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css'
-// ];
+resources.forEach(loadResourses);
 
-
-// resources.forEach(loadResourses);
-
-
-// await Promise.all(Object.keys(cssPromises));
-
+Promise.all(Object.keys(cssPromises));
 
 export class CreditCard {
   constructor() {
-
     document.body.classList.add('h-100');
     document.documentElement.classList.add('h-100');
     this.createComponentContainer();
@@ -64,9 +58,9 @@ export class CreditCard {
     mount(this.formContainer, this.dateInput);
     mount(this.formContainer, this.emailInput);
     mount(this.formContainer, this.cvvNumber);
-    mount(this.formContainer, this.sumbitButton);
-
     mount(this.imageContainer, this.image);
+
+    mount(document.body, el('div.container.p-0',this.sumbitButton));
   }
 
   dateValid = false;
@@ -76,7 +70,7 @@ export class CreditCard {
   re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
   createComponentContainer() {
-    const container = el('div.container.my-5.p-0.d-flex.flex-column.credit-card-component.mh-100');
+    const container = el('div.container.mt-5.mb-2.p-0.d-flex.flex-row.credit-card-component.mh-100');
     this.container = container;
   }
 
@@ -98,7 +92,7 @@ export class CreditCard {
     this.cardWrapper = cardWrapper;
 
     const dateInput = el('input.form-control.w-100.mb-2', {
-      type: 'text',
+      type: 'text'
     });
     const dateWrapper = new Inputmask({
       mask: '99/99',
@@ -108,18 +102,22 @@ export class CreditCard {
     this.dateInput = dateInput;
     this.dateWrapper = dateWrapper;
 
-    const cvvNumber = el('input.form-control.w-100.mb-2', {
+    const cvvNumber = el('input.form-control.w-100', {
       type: 'text',
+      // placeholder: 'CVV'
     });
     const cvvWrapper = new Inputmask({
       mask: '999',
-      placeholder: '0'
+      placeholder: ''
     });
     cvvWrapper.mask(cvvNumber);
     this.cvvNumber = cvvNumber;
     this.cvvWrapper = cvvWrapper;
 
-    const emailInput = el('input.form-control.w-100.mb-2', { type: 'text' });
+    const emailInput = el('input.form-control.w-100.mb-2', {
+      type: 'text',
+      placeholder: 'Email'
+    });
     const emailWrapper = new Inputmask({
       mask: '*{1,20}[.*{1,20}][.*{1,20}][.*{1,20}]@*{1,20}[.*{2,6}][.*{1,2}]'
     })
@@ -147,10 +145,11 @@ export class CreditCard {
         }
         console.log(numberValidation);
 
-        if (numberValidation.card.type === 'visa') this.image.src = require('../assets/visa.png');
-        else if (numberValidation.card.type === 'mastercard') this.image.src = require('../assets/mastercard.png');
-        else this.image.src = require('../icon.png');
-        console.log(this.image.src);
+        if (numberValidation.card.type === 'visa') this.image.src = require('./assets/visa.png');
+        else if (numberValidation.card.type === 'mastercard') this.image.src = require('./assets/mastercard.png');
+        else this.image.src = require('./icon.png');
+        this.image.classList.remove('d-none');
+        this.image.classList.add('d-inline-flex');
         this.cardValid = true;
         this.activateSubmitButton();
       }
@@ -224,9 +223,7 @@ export class CreditCard {
       'blur',
       () => {
         this.cvvValid = false;
-        if (this.cvvNumber.value.length < 3 ||
-                    this.cvvNumber.value.split('')
-                    .every(char => { return char === '0' })) {
+        if (this.cvvNumber.value.length < 3) {
           this.cvvNumber.classList.add('border-danger');
           this.activateSubmitButton();
           return;
@@ -250,7 +247,7 @@ export class CreditCard {
   }
 
   createImage() {
-    const image = el('img.d-inline-flex.w-100',{alt: 'Картинка платежной системы', style: {maxWidth: 'none'}});
+    const image = el('img.d-none.w-100',{alt: 'Картинка платежной системы', style: {maxWidth: 'none', height: '184px'}});
     this.image = image;
   }
 
