@@ -1,8 +1,11 @@
+// import 'babel-loader';
+
 import {
   el,
   mount
 } from 'redom';
 import Inputmask from 'inputmask';
+
 let valid = require('card-validator');
 
 const cssPromises = {};
@@ -256,3 +259,13 @@ export class CreditCard {
     this.sumbitButton.disabled = !(this.cardValid && this.dateValid && this.emailValid && this.cvvValid);
   }
 }
+
+const iconLink = el('link', {
+  rel: 'icon',
+  type: 'image/x-icon',
+  href: require('./icon.png'),
+});
+
+document.head.append(iconLink);
+
+const card = new CreditCard();
