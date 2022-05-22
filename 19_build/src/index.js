@@ -1,4 +1,4 @@
-// import 'babel-loader';
+import 'babel-polyfill';
 
 import {
   el,
