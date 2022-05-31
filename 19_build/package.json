@@ -3,6 +3,7 @@
   "scripts": {
     "lint": "eslint ./",
     "lint:report": "eslint ./",
+    "lint:fix": "eslint ./src --fix",
     "dev_parcel": "parcel src/index.html",
     "build_parcel": "parcel build src/index.html",
     "build": "webpack --mode=production --env prod",
