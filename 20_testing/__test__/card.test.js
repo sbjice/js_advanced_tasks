@@ -14,15 +14,26 @@ test('Проверка создания элементов на странице
 test('Проверка корректного номера карты', () => {
   const card = new CreditCard();
   const cardInputs = card.createAndAddElements();
-  cardInputs[0].value = '4111 1111 1111 1111';
-  cardInputs[1].value = '1';
+  cardInputs[0].focus();
+  cardInputs[0].value = '4111111111111111';
+  cardInputs[0].blur();
   expect(cardInputs[0].classList).not.toContain('border-danger');
 });
 
 test('Проверка некорректного номера карты', () => {
   const card = new CreditCard();
   const cardInputs = card.createAndAddElements();
-  cardInputs[0].value = '41111умык4./a#%$^^';
-  cardInputs[1].focus();
+  cardInputs[0].focus();
+  cardInputs[0].value = 'умык4./a#%$^^';
+  cardInputs[0].blur();
+  expect(cardInputs[0].classList).toContain('border-danger');
+});
+
+test('Проверка короткого номера карты', () => {
+  const card = new CreditCard();
+  const cardInputs = card.createAndAddElements();
+  cardInputs[0].focus();
+  cardInputs[0].value = '111';
+  cardInputs[0].blur();
   expect(cardInputs[0].classList).toContain('border-danger');
 });

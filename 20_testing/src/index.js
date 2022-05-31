@@ -170,6 +170,7 @@ export class CreditCard {
     mount(this.container, this.formContainer);
 
     const obj = this.createFormElements();
+    this.configCardNumberInput();
     mount(this.formContainer, this.cardNumber);
     mount(this.formContainer, this.dateInput);
     mount(this.formContainer, this.emailInput);
@@ -191,13 +192,13 @@ export class CreditCard {
         }
         // console.log(numberValidation);
 
-        if (numberValidation.card.type === 'visa') this.image.src = require('./assets/visa.png');
-        else if (numberValidation.card.type === 'mastercard') this.image.src = require('./assets/mastercard.png');
-        else this.image.src = require('./icon.png');
-        this.image.classList.remove('d-none');
-        this.image.classList.add('d-inline-flex');
+        // if (numberValidation.card.type === 'visa') this.image.src = require('./assets/visa.png');
+        // else if (numberValidation.card.type === 'mastercard') this.image.src = require('./assets/mastercard.png');
+        // else this.image.src = require('./icon.png');
+        // this.image.classList.remove('d-none');
+        // this.image.classList.add('d-inline-flex');
         this.cardValid = true;
-        this.activateSubmitButton();
+        // this.activateSubmitButton();
       },
     );
 
