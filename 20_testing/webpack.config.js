@@ -26,6 +26,7 @@ module.exports = (env) => ({
         type: 'asset/resource',
       },
     ],
+    exprContextCritical: false,
   },
   optimization: {
     minimizer: [

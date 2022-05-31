@@ -40,6 +40,11 @@ resources.forEach(loadResourses);
 
 Promise.all(Object.keys(cssPromises));
 
+// const link = document.createElement('link');
+// link.rel = 'stylesheet';
+// link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css';
+// document.head.append(link);
+
 const iconLink = el('link', {
   rel: 'icon',
   type: 'image/x-icon',
@@ -163,7 +168,6 @@ export class CreditCard {
     this.createFormContainer();
     mount(document.body, this.container);
     mount(this.container, this.formContainer);
-    mount(this.container, this.imageContainer);
 
     const obj = this.createFormElements();
     mount(this.formContainer, this.cardNumber);
