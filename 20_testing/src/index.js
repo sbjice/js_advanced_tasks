@@ -132,7 +132,7 @@ export class CreditCard {
       placeholder: 'CVV/CVC',
     });
     const cvvWrapper = new Inputmask({
-      mask: '999',
+      // mask: '999',
       // placeholder: ' ',
     });
     cvvWrapper.mask(cvvNumber);
@@ -155,26 +155,34 @@ export class CreditCard {
     });
     this.sumbitButton = sumbitButton;
 
-    return [
+    return {
       cardNumber,
       dateInput,
       cvvNumber,
       emailInput,
-    ];
+    };
   }
 
   createAndAddElements() {
     this.createComponentContainer();
     this.createFormContainer();
-    mount(document.body, this.container);
-    mount(this.container, this.formContainer);
+    this.createImageContainer();
+    this.createImage();
 
     const obj = this.createFormElements();
     this.configCardNumberInput();
+    this.configDateInput();
+    this.configEmailInput();
+    this.configCVVNumberInput();
+
+    mount(document.body, this.container);
+    mount(this.container, this.formContainer);
+    mount(this.container, this.imageContainer);
     mount(this.formContainer, this.cardNumber);
     mount(this.formContainer, this.dateInput);
     mount(this.formContainer, this.emailInput);
     mount(this.formContainer, this.cvvNumber);
+    mount(this.imageContainer, this.image);
     return obj;
   }
 
@@ -190,15 +198,13 @@ export class CreditCard {
           this.activateSubmitButton();
           return;
         }
-        // console.log(numberValidation);
-
-        // if (numberValidation.card.type === 'visa') this.image.src = require('./assets/visa.png');
-        // else if (numberValidation.card.type === 'mastercard') this.image.src = require('./assets/mastercard.png');
-        // else this.image.src = require('./icon.png');
-        // this.image.classList.remove('d-none');
-        // this.image.classList.add('d-inline-flex');
+        if (numberValidation.card.type === 'visa') this.image.src = require('./assets/visa.png');
+        else if (numberValidation.card.type === 'mastercard') this.image.src = require('./assets/mastercard.png');
+        else this.image.src = require('./icon.png');
+        this.image.classList.remove('d-none');
+        this.image.classList.add('d-inline-flex');
         this.cardValid = true;
-        // this.activateSubmitButton();
+        this.activateSubmitButton();
       },
     );
 
@@ -270,7 +276,9 @@ export class CreditCard {
       'blur',
       () => {
         this.cvvValid = false;
-        if (this.cvvNumber.value.length < 3) {
+        const clearValue = this.cvvNumber.value.replace('_', '').split('').filter(char => char > -1 || char < 11).join('');
+        // console.log(clearValue);
+        if (clearValue.length < 3 || Number(clearValue) > 999) {
           this.cvvNumber.classList.add('border-danger');
           this.activateSubmitButton();
           return;
@@ -283,6 +291,7 @@ export class CreditCard {
     this.cvvNumber.addEventListener(
       'input',
       () => {
+        this.cvvNumber.value = this.cvvNumber.value.split('').filter(char => char > -1 || char < 11).join('');
         this.cvvNumber.classList.remove('border-danger');
       },
     );
