@@ -11,7 +11,9 @@
     "build_parcel": "parcel build src/index.html",
     "build": "webpack --mode=production --env prod",
     "dev": "webpack serve --mode=development",
-    "test": "jest"
+    "test": "jest",
+    "e2e": "npx cypress open",
+    "pairs": "serve ./pairs"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,7 @@
     "@babel/preset-env": "^7.18.2",
     "babel-jest": "^28.1.0",
     "babel-loader": "^8.2.5",
+    "cypress": "^10.0.2",
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
