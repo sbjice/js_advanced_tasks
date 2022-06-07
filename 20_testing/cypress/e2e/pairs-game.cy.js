@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-disabled-tests */
 /* eslint-disable jest/expect-expect */
 /* eslint-disable no-undef */
 /// <reference types="cypress" />
@@ -17,45 +18,38 @@ describe('Игра в пары', () => {
     cy.get('button').click();
   });
 
-  it('Проверяется количество строк в поле', () => {
+  it.skip('Проверяется количество строк в поле', () => {
     cy.get('div#pairs-game').children().should('have.length', numberOfRows + 1);
     cy.get('div#pairs-game').children().children().should('have.text', '');
   });
 
-  it('Проверяется отсутствие текста в ячейках', () => {
+  it.skip('Проверяется отсутствие текста в ячейках', () => {
     cy.get('div#pairs-game').children().children().should('have.text', '');
   });
 
-  it('Ячейка нажимается и остается открытой', () => {
+  it.skip('Ячейка нажимается и остается открытой', () => {
     cy.get('div#pairs-game > div').eq(firstRow).children().eq(firstCol).click();
     cy.get('div#pairs-game > div').eq(firstRow).children().eq(firstCol).should('not.have.text', '');
   });
 
   it('Поиск пары', () => {
-    let firstValue = '';
-    let secondValue = ' ';
-    // let equals = false;
-    cy.get('div#pairs-game > div').each((el, ind, list) => {
-      // if (equals) return false;
-      cy.get('div#pairs-game > div').eq(ind).children().each((el1, ind1, list1) => {
-        cy.get('div#pairs-game > div').eq(firstRow).children().eq(firstCol).click().then($item => {
-          firstValue = $item.text();
-          console.log(firstValue);
-        });
+    const selectedCellNumber = (firstRow * numberOfRows) + firstCol;
+    cy.get('div#pairs-game > div > div').eq(selectedCellNumber).click().invoke('text').as('firstValue');
+    cy.get('@firstValue').then(el => {
+      console.log(el);
+    });
+
+    cy.get('div#pairs-game > div > div').each((el, ind, list) => {
+      if (ind !== selectedCellNumber) {
+        cy.get('div#pairs-game > div > div').eq(ind).click().invoke('text').as('val');
         cy.wait(500);
-        cy.get('div#pairs-game > div').eq(ind).children().eq(ind1).click().then($item => {
-          secondValue = $item.text();
-          console.log(secondValue);
-        });
+        cy.get('div#pairs-game > div > div').eq(selectedCellNumber).click();
         cy.wait(500);
-        console.log(firstValue, secondValue);
-        // if (firstValue.localeCompare(secondValue) === 0) {
-        //   equals = true;
-        //   console.log(equals);
-        //   return false;
-        // }
-      });
-    })
+        return cy.get('@firstValue').then(firstValue => {
+          cy.get('@val').then(text => text.localeCompare(firstValue) === 0)
+        });
+      };
+    });
   });
 
 });
