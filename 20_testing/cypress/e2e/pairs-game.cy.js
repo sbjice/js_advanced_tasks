@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable jest/no-disabled-tests */
 /* eslint-disable jest/expect-expect */
 /* eslint-disable no-undef */
@@ -32,24 +33,87 @@ describe('Игра в пары', () => {
     cy.get('div#pairs-game > div').eq(firstRow).children().eq(firstCol).should('not.have.text', '');
   });
 
-  it('Поиск пары', () => {
-    const selectedCellNumber = (firstRow * numberOfRows) + firstCol;
-    cy.get('div#pairs-game > div > div').eq(selectedCellNumber).click().invoke('text').as('firstValue');
-    cy.get('@firstValue').then(el => {
-      console.log(el);
-    });
+  it.skip('Поиск пары', () => {
+    // const selectedCellNumber = (firstRow * numberOfRows) + firstCol;
+    let shouldStop = false;
+    let foundElementIndex = 0;
+    cy.get('div#pairs-game > div > div').eq(0).click().invoke('text').as('firstValue');
+    cy.get('div#pairs-game > div > div').eq(0).click().invoke('text').as('secondValue');
+    cy.wait(500);
 
     cy.get('div#pairs-game > div > div').each((el, ind, list) => {
-      if (ind !== selectedCellNumber) {
-        cy.get('div#pairs-game > div > div').eq(ind).click().invoke('text').as('val');
-        cy.wait(500);
-        cy.get('div#pairs-game > div > div').eq(selectedCellNumber).click();
-        cy.wait(500);
-        return cy.get('@firstValue').then(firstValue => {
-          cy.get('@val').then(text => text.localeCompare(firstValue) === 0)
-        });
-      };
+      cy.then(() => {
+        if (ind !== 0) {
+          if (shouldStop) return;
+          cy.get('div#pairs-game > div > div').eq(0).click();
+          cy.wait(500);
+          cy.wrap(el)
+          .click()
+          .invoke('text')
+          .then(text => {
+            cy.get('@firstValue').then(firstValue => {
+              if (text.localeCompare(firstValue) === 0) {
+                foundElementIndex = ind;
+                shouldStop = true; 
+              }
+            });
+          });
+        };
+      });
     });
+
+    cy.get('div#pairs-game > div > div').eq(0).should('not.have.text', '');
+    cy.get('div#pairs-game > div > div').eq(foundElementIndex).should('not.have.text', '');
+  });
+
+  it('Поиск непарных карточек', () => {
+    // const selectedCellNumber = (firstRow * numberOfRows) + firstCol;
+    const startIndex = 0;
+    let shouldStop = false;
+    let pairFound = false;
+    let foundElementIndex = 0;
+    let secondFoundElementIndex = 0;
+    cy.get('div#pairs-game > div > div').eq(startIndex).click().invoke('text').as('firstValue');
+    cy.get('div#pairs-game > div > div').eq(startIndex).click().invoke('text').as('secondValue');
+    cy.wait(500);
+
+    cy.get('div#pairs-game > div > div').each((el, ind, list) => {
+      cy.then(() => {
+        if (ind !== startIndex) {
+          if (shouldStop) return;
+          cy.get('div#pairs-game > div > div').eq(startIndex).click();
+          cy.wait(500);
+          cy.wrap(el)
+          .click()
+          .invoke('text')
+          .then(text => {
+            cy.get('@firstValue').then(firstValue => {
+              if (!pairFound && text.localeCompare(firstValue) === 0) {
+                pairFound = true;
+              } 
+              if (pairFound)  {
+                foundElementIndex = ind + 1;
+              }
+            });
+            console.log(foundElementIndex, ind);
+            if (pairFound && ind === foundElementIndex) {
+              cy.wrap(el).invoke('text').as('newValue');
+            } 
+            if(pairFound && ind > foundElementIndex) {
+              cy.get('@newValue').then(newValue => {
+                if (text.localeCompare(newValue) !== 0) {
+                  shouldStop = true;
+                  secondFoundElementIndex = ind;
+                }
+              });
+            }
+          });
+        };
+      });
+    });
+
+    cy.get('div#pairs-game > div > div').eq(foundElementIndex).should('have.text', '');
+    cy.get('div#pairs-game > div > div').eq(secondFoundElementIndex).should('have.text', '');
   });
 
 });
