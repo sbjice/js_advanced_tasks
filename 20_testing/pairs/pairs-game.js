@@ -130,6 +130,8 @@
 
   function configureGameField(gridLength, container) {
     const shuffledPairs = shuffle(generatePairs(gridLength));
+    // const shuffledPairs = [1, 1, 2, 3,  2, 4, 5, 6,   7, 6, 5, 4,   3, 8, 9, 8];
+
     const cells = createGrid(container, ['col-auto', 'bg-primary', 'mr-1', 'mb-1', 'border', 'border-primary', 'rounded', 'align-items-center', 'justify-content-center', 'd-flex'], gridLength);
     const combinedCells = combineCellsWithValues(cells, shuffledPairs);
     let timerID = null;
@@ -137,8 +139,8 @@
       cell.element.addEventListener('click', () => {
         if (!cell.disabled) changeCellState(cell);
         for (const item of combinedCells) {
-          if (item !== cell && item.value === cell.value
-             && item.opened && cell.opened && !cell.disabled && !item.disabled) {
+          if (item !== cell && item.value === cell.value &&
+            item.opened && cell.opened && !cell.disabled && !item.disabled) {
             item.disabled = true;
             cell.disabled = true;
             item.element.classList.remove('bg-primary', 'bg-warning');
@@ -146,8 +148,8 @@
             item.element.classList.add('bg-success');
             cell.element.classList.add('bg-success');
             break;
-          } else if (item !== cell && item.value !== cell.value
-            && item.opened && cell.opened && !cell.disabled && !item.disabled) {
+          } else if (item !== cell && item.value !== cell.value &&
+            item.opened && cell.opened && !cell.disabled && !item.disabled) {
             setTimeout(() => {
               changeCellState(cell);
               changeCellState(item);
